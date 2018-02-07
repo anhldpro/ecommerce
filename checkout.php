@@ -70,15 +70,13 @@
 						Welcome Guest! <b style="color:yellow">Shopping Cart - </b> Total Items: <?php total_items(); ?> - Total Price: <?php total_price(); ?> <a href="cart.php" style="color:yellow">Go to Cart</a></span>
 				</div>
 				<div id="products_box">
-					<?php
-						getPro();
-					?>
-					<?php
-						getCatPro();
-					?>
-					<?php
-						getBrandPro();
-					?>
+                    <?php
+                        if(!isset($_SESSION['customer_email'])){
+                            include("customer_login.php");
+                        }else{
+                            include("payment.php");
+                        }
+                    ?>
 					
 				</div>
 

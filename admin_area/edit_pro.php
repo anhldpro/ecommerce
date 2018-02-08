@@ -2,36 +2,68 @@
 
 <?php
 include("includes/db.php");
-if(!isset($_SESSION['user_email'])){
-    echo "<script>window.open('login.php?not_admin=You are not an Admin!','_self');</script>";
-}else{
+if(isset($_GET['edit_pro'])){
+    $get_id = $_GET['edit_pro'];
+
+    $get_pro = "select * from products where product_id='$get_id'";
+    $run_pro = mysqli_query($con, $get_pro);
+
+
+    while($row_pro=mysqli_fetch_array($run_pro)){
+        $pro_id = $row_pro['product_id'];
+        $pro_title = $row_pro['product_title'];
+        $pro_image = $row_pro['product_image'];
+        $pro_price = $row_pro['product_price'];
+        $pro_desc = $row_pro['product_desc'];
+        $pro_keywords = $row_pro['product_keywords'];
+        $pro_cat = $row_pro['product_cat'];
+        $pro_brand = $row_pro['product_brand'];
+
+        $get_cat = "select * from categories where cat_id='$pro_cat'";
+
+        $run_cat = mysqli_query($con, $get_cat);
+
+        $row_cat = mysqli_fetch_array($run_cat);
+
+        $category_title = $row_cat['cat_title'];
+
+        $get_brand = "select * from brands where brand_id='$pro_brand'";
+
+        $run_brand = mysqli_query($con, $get_brand);
+
+        $row_brand = mysqli_fetch_array($run_brand);
+
+        $brand_title = $row_brand['brand_title'];
+
+    }
+}
 ?>
 <html>
     <head>
-        <title>Inserting Product</title>
+        <title>Update Product</title>
         <script src="https://cloud.tinymce.com/stable/tinymce.min.js"></script>
         <script>tinymce.init({ selector:'textarea' });</script>
     </head>
 
 
     <body bgcolor="skyblue">
-        <form action="insert_product.php" method="post" enctype="multipart/form-data">
+        <form action="" method="post" enctype="multipart/form-data">
 
             <table align="center" width="795" border="2" bgcolor="#187eae">
                 <tr align="center">    
                     <td colspan="7">
-                        <h2>Insert New Post Here</h2>
+                        <h2>Edit & Update Product</h2>
                     </td>
                 </tr>
                 <tr>
                     <td align="right"><b>Product Title:</b></h2></td>
-                    <td><input type="text" name="product_title" size="60" required/></td>
+                    <td><input type="text" name="product_title" size="60" required value="<?php echo $pro_title; ?>"/></td>
                 </tr>
                 <tr>
                     <td align="right"><b>Product Category:</b></h2></td>
                     <td>
                         <select name="product_cat" required>
-                            <option>Select a Category</option>
+                            <option value="<?php echo $pro_cat ?>"><?php echo $category_title; ?></option>
                             <?php
                                 $get_cats = "select * from categories";
                                     
@@ -52,7 +84,7 @@ if(!isset($_SESSION['user_email'])){
                     <td align="right"><b>Product Brand:</b></h2></td>
                     <td>
                         <select name="product_brand" required>
-                            <option>Select a Brand</option>
+                            <option value="<?php echo $pro_brand ?>"><?php echo $brand_title; ?></option>
                             <?php
                                 $get_brands = "select * from brands";
     
@@ -71,22 +103,24 @@ if(!isset($_SESSION['user_email'])){
                 </tr>
                 <tr>
                     <td align="right"><b>Product Image:</b></h2></td>
-                    <td><input type="file" name="product_image"  required/></td>
+                    <td><input type="file" name="product_image"  required/>
+                    <img src="product_images/<?php echo $pro_image; ?>" width="60" height="60" />
+                    </td>
                 </tr>
                 <tr>
                     <td align="right"><b>Product Price:</b></h2></td>
-                    <td><input type="text" name="product_price" required /></td>
+                    <td><input type="text" name="product_price" required value="<?php echo $pro_price; ?>"/></td>
                 </tr>
                 <tr>
                     <td align="right"><b>Product Desc:</b></h2></td>
-                    <td><textarea name="product_desc" cols="20" rows="10" ></textarea></td>
+                    <td><textarea name="product_desc" cols="20" rows="10" ><?php echo $pro_desc; ?></textarea></td>
                 </tr>
                 <tr>
                     <td align="right"><b>Product Keywords:</b></h2></td>
-                    <td><input type="text" name="product_keywords" size="60" required /></td>
+                    <td><input type="text" name="product_keywords" size="60" required value="<?php echo $pro_keywords; ?>"/></td>
                 </tr>
                 <tr align="center">
-                    <td colspan="8"><input type="submit" name="insert_post" value="Insert Product Now" /></td>
+                    <td colspan="8"><input type="submit" name="update_product" value="Update Product" /></td>
                 </tr>
 
             </table>
@@ -96,7 +130,8 @@ if(!isset($_SESSION['user_email'])){
     </body>
 </html>
 <?php
-    if(isset($_POST['insert_post'])){
+    if(isset($_POST['update_product'])){
+        $update_id = $pro_id;
         $product_title = $_POST['product_title'];
         $product_cat = $_POST['product_cat'];
         $product_brand = $_POST['product_brand'];
@@ -110,19 +145,21 @@ if(!isset($_SESSION['user_email'])){
 
         move_uploaded_file($product_image_tmp, "product_images/$product_image");
         
-        $insert_product = "insert into products(
-            product_title,product_cat, product_brand,product_price,product_desc,product_image,product_keywords) 
-        values ('$product_title', '$product_cat', '$product_brand', '$product_price', '$product_desc', '$product_image',  '$product_keywords')";
+        $update_product = "update products set product_title='$product_title',
+           
+            product_price='$product_price',
+            product_desc='$product_desc',
+            product_image='$product_image',
+            product_keywords='$product_keywords' where product_id='$update_id'"; 
 
 
-        $insert_pro = mysqli_query($con, $insert_product);
+        $run_product = mysqli_query($con, $update_product);
 
-        if($insert_pro){
-            echo "<script>alert('Product Has been inserted');</script>";
-            echo "<script>window.open('index.php?insert_product','_self');</script>";
+
+        if($run_product){
+            echo "<script>alert('Product Has been updated');</script>";
+            echo "<script>window.open('index.php?view_products','_self');</script>";
         }
     }
 
 ?>
-
-<?php } ?>
